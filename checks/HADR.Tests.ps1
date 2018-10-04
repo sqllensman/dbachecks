@@ -9,17 +9,31 @@ function Get-ClusterObject {
     
     [pscustomobject]$return = @{}
     # Don't think you can use the cluster name here it won't run remotely
-    $return.Cluster = (Get-Cluster -Name $clustervm)
-    $return.Nodes = (Get-ClusterNode -Cluster $clustervm)
-    $return.Resources = (Get-ClusterResource -Cluster $clustervm)
-    $return.Network = (Get-ClusterNetwork -Cluster $clustervm)
-    $return.Groups = (Get-ClusterGroup -Cluster $clustervm)
-    $return.AGs = $return.Resources.Where{ $psitem.ResourceType -eq 'SQL Server Availability Group' }
+    try {
+        $ErrorActionPreference = 'Stop'
+        $return.Cluster = (Get-Cluster -Name $clustervm)
+        $return.Nodes = (Get-ClusterNode -Cluster $clustervm)
+        $return.Resources = (Get-ClusterResource -Cluster $clustervm)
+        $return.Network = (Get-ClusterNetwork -Cluster $clustervm)
+        $return.Groups = (Get-ClusterGroup -Cluster $clustervm)
+        $return.AGs = $return.Resources.Where{ $psitem.ResourceType -eq 'SQL Server Availability Group' }
+    }
+    catch {
+        $return.Cluster = 'FailedToConnect'
+        $return.Nodes = 'FailedToConnect'
+        $return.Resources = 'FailedToConnect'
+        $return.Network = 'FailedToConnect'
+        $return.Groups = 'FailedToConnect'
+        $return.AGs = 'FailedToConnect'
+    }
     $return.AvailabilityGroups = @{}
     #Add all the AGs
     foreach ($Ag in $return.AGs) {
-
-        $return.AvailabilityGroups[$AG.Name] = Get-DbaAvailabilityGroup -SqlInstance $Ag.OwnerNode.Name -AvailabilityGroup $AG.Name
+        try {
+            $return.AvailabilityGroups[$AG.Name] = Get-DbaAvailabilityGroup -SqlInstance $Ag.OwnerNode.Name -AvailabilityGroup $AG.Name
+        }
+        catch {
+        }
     }
     Return $return
 }
@@ -45,18 +59,25 @@ $tcpport = Get-DbcConfigValue policy.hadr.tcpport
 
 #Check for Cluster config value
 if ($clusters.Count -eq 0) {
-    Write-Warning "No Clusters to look at. Please use Set-DbcConfig -Name app.clusters to add clusters for checking"
+    Write-Warning "No Clusters to look at. Please use Set-DbcConfig -Name app.cluster to add clusters for checking"
     break
 }
     
 foreach ($clustervm in $clusters) {
+    try{
     # pick the name here for the output - we cant use it as we are accessing remotely
-    $clustername = (Get-Cluster -Name $clustervm).Name
+    $clustername = (Get-Cluster -Name $clustervm -ErrorAction Stop).Name 
+    }
+    catch{
+        # so that we dont get the error and Get-ClusterObject fills it as FailedtoConnect
+        $clustername = $clustervm
+    }
+
     Describe "Cluster $clustername Health using Node $clustervm" -Tags ClusterHealth, $filename {
-        $return = Get-ClusterObject -Clustervm $clustervm
+        $return = @(Get-ClusterObject -Clustervm $clustervm)
     
         Context "Cluster nodes for $clustername" {
-            $return.Nodes.ForEach{
+            @($return.Nodes).ForEach{
                 It "Node $($psitem.Name) should be up" {
                     $psitem.State | Should -Be 'Up' -Because 'Every node in the cluster should be available'
                 }
@@ -64,20 +85,20 @@ foreach ($clustervm in $clusters) {
         }
         Context "Cluster resources for $clustername" {
             # Get the resources that are no IP Addresses with an owner of Availability Group
-            $return.Resources.Where{$_.ResourceType -notin ($_.ResourceType -eq  'IP Address' -and $_.OwnerGroup -in $Return.Ags)}.ForEach{
+            $return.Resources.Where{$_.ResourceType -notin ($_.ResourceType -eq 'IP Address' -and $_.OwnerGroup -in $Return.Ags)}.ForEach{
                 It "Resource $($psitem.Name) should be online" {
                     $psitem.State | Should -Be 'Online' -Because 'All of the cluster resources should be online'
                 }
             }
             # Get teh resources where IP Address is owned by AG and group by AG
-            ($return.Resources.Where{$_.ResourceType -eq 'IP Address'-and $_.OwnerGroup -in $return.AGs} | Group-Object -Property OwnerGroup).ForEach{
+            @($return.Resources.Where{$_.ResourceType -eq 'IP Address' -and $_.OwnerGroup -in $return.AGs} | Group-Object -Property OwnerGroup).ForEach{
                 It "One of the IP Addresses for Availability Group $($Psitem.Name) Should be online" {
                     $psitem.Group.Where{$_.State -eq 'Online'}.Count | Should -Be 1 -Because "There should be one IP Address online for Availability Group $($PSItem.Name)"
                 }
             }
         }
         Context "Cluster networks for $clustername" {
-            $return.Network.ForEach{
+            @($return.Network).ForEach{
                 It "$($psitem.Name) should be up" {
                     $psitem.State | Should -Be 'Up' -Because 'All of the CLuster Networks should be up'
                 }
@@ -85,18 +106,24 @@ foreach ($clustervm in $clusters) {
         }
         
         Context "HADR status for $clustername" {
-            $return.Nodes.ForEach{
+            @($return.Nodes).ForEach{
                 It "HADR should be enabled on the node $($psitem.Name)" {
-                    (Get-DbaAgHadr -SqlInstance $psitem.Name).IsHadrEnabled | Should -BeTrue -Because 'All of the nodes should have HADR enabled'
+                    try {
+                        $HADREnabled = (Get-DbaAgHadr -SqlInstance $psitem.Name -WarningAction SilentlyContinue).IsHadrEnabled
+                    }
+                    catch {
+                        $HADREnabled = $false
+                    }
+                    $HADREnabled | Should -BeTrue -Because 'All of the nodes should have HADR enabled'
                 }
             }
         }
         $Ags = $return.AGs.Name
         foreach ($Name in $Ags) {
-            $Ag = $return.AvailabilityGroups[$Name]
+            $Ag = @($return.AvailabilityGroups[$Name])
             
             Context "Cluster Connectivity for Availability Group $($AG.Name) on $clustername" {
-                $AG.AvailabilityGroupListeners.ForEach{
+                @($AG.AvailabilityGroupListeners).ForEach{
                     $results = Test-DbaConnection -sqlinstance $_.Name
                     It "Listener $($results.SqlInstance) should be pingable" -skip:$skiplistener {
                         $results.IsPingable | Should -BeTrue -Because 'The listeners should be pingable'
@@ -112,7 +139,7 @@ foreach ($clustervm in $clusters) {
                     }
                 }
 
-                $AG.AvailabilityReplicas.ForEach{
+                @($AG.AvailabilityReplicas).ForEach{
                     $results = Test-DbaConnection -sqlinstance $PsItem.Name
                     It "Replica $($results.SqlInstance) Should Be Pingable" {
                         $results.IsPingable | Should -BeTrue -Because 'Each replica should be pingable'
@@ -130,12 +157,12 @@ foreach ($clustervm in $clusters) {
             }
 
             Context "Availability group status for $($AG.Name) on $clustername" {
-                $AG.AvailabilityReplicas.ForEach{
+                @($AG.AvailabilityReplicas).ForEach{
                     It "$($psitem.Name) replica should not be in unknown availability mode" {
                         $psitem.AvailabilityMode | Should -Not -Be 'Unknown' -Because 'The replica should not be in unknown state'
                     }
                 }
-                $AG.AvailabilityReplicas.Where{ $psitem.AvailabilityMode -eq 'SynchronousCommit' }.ForEach{
+                @($AG.AvailabilityReplicas).Where{ $psitem.AvailabilityMode -eq 'SynchronousCommit' }.ForEach{
                     It "$($psitem.Name) replica should be synchronised" {
                         $psitem.RollupSynchronizationState | Should -Be 'Synchronized' -Because 'The synchronous replica should be synchronised'
                     }
@@ -145,8 +172,8 @@ foreach ($clustervm in $clusters) {
                         $psitem.RollupSynchronizationState | Should -Be 'Synchronizing' -Because 'The asynchronous replica should be synchronizing '
                     }
                 }
-                $AG.AvailabilityReplicas.Where.ForEach{
-                    It"$($psitem.Name) replica should be connected" {
+                @($AG.AvailabilityReplicas).Where.ForEach{
+                    It "$($psitem.Name) replica should be connected" {
                         $psitem.ConnectionState | Should -Be 'Connected' -Because 'The replica should be connected'
                     }
                 }
@@ -154,8 +181,8 @@ foreach ($clustervm in $clusters) {
             }
         
             Context "Database availability group status for $($AG.Name) on $clustername" {
-                $ag.AvailabilityReplicas.Where{$_.AvailabilityMode -eq 'SynchronousCommit' }.ForEach{
-                    (Get-DbaAgDatabase -SqlInstance $psitem.Name -AvailabilityGroup $Ag.Name).ForEach{
+                @($ag.AvailabilityReplicas.Where{$_.AvailabilityMode -eq 'SynchronousCommit' }).ForEach{
+                    @(Get-DbaAgDatabase -SqlInstance $psitem.Name -AvailabilityGroup $Ag.Name).ForEach{
                         It "Database $($psitem.DatabaseName) should be synchronised on the replica $($psitem.Replica)" {
                             $psitem.SynchronizationState | Should -Be 'Synchronized'  -Because 'The database on the synchronous replica should be synchronised'
                         }
@@ -170,8 +197,8 @@ foreach ($clustervm in $clusters) {
                         }
                     }
                 }
-                $ag.AvailabilityReplicas.Where{$_.AvailabilityMode -eq 'AsynchronousCommit' }.ForEach{
-                    (Get-DbaAgDatabase -SqlInstance $PSItem.Name -AvailabilityGroup $Ag.Name).ForEach{
+                @($ag.AvailabilityReplicas.Where{$_.AvailabilityMode -eq 'AsynchronousCommit' }).ForEach{
+                    @(Get-DbaAgDatabase -SqlInstance $PSItem.Name -AvailabilityGroup $Ag.Name).ForEach{
                         It "Database $($psitem.DatabaseName) should be synchronising on the secondary as it is Async" {
                             $psitem.SynchronizationState | Should -Be 'Synchronizing' -Because 'The database on the asynchronous secondary replica should be synchronising'
                         }
@@ -188,9 +215,14 @@ foreach ($clustervm in $clusters) {
                 }
             } 
         }
-        $return.Nodes.ForEach{
+        @($return.Nodes).ForEach{
             Context "Always On extended event status for replica $($psitem.Name) on $clustername" {
-                $Xevents = Get-DbaXEsession -SqlInstance $psitem.Name
+                try {
+                    $Xevents = Get-DbaXEsession -SqlInstance $psitem.Name -WarningAction SilentlyContinue
+                }
+                catch {
+                    $Xevents = 'FailedToConnect'
+                }
                 It "Replica $($psitem.Name) should have an extended event session called AlwaysOn_health" {
                     $Xevents.Name  | Should -Contain 'AlwaysOn_health' -Because 'The extended events session should exist'
                 }

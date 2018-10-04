@@ -19,7 +19,8 @@ Register-PSFConfigValidation -Name validation.EmailValidation -ScriptBlock $Emai
 
 # some configs to help with autocompletes and other module level stuff
 #apps
-Set-PSFConfig -Module dbachecks -Name app.checkrepos -Value "$script:ModuleRoot\checks" -Initialize -Description "Where Pester tests/checks are stored"
+$defaultRepo = "$script:ModuleRoot\checks"
+Set-PSFConfig -Module dbachecks -Name app.checkrepos -Value @($defaultRepo) -Initialize -Description "Where Pester tests/checks are stored"
 Set-PSFConfig -Module dbachecks -Name app.sqlinstance -Value $null -Initialize -Description "List of SQL Server instances that SQL-based tests will run against"
 Set-PSFConfig -Module dbachecks -Name app.computername -Value $null -Initialize -Description "List of Windows Servers that Windows-based tests will run against"
 Set-PSFConfig -Module dbachecks -Name app.sqlcredential -Value $null -Initialize -Description "The universal SQL credential if Trusted/Windows Authentication is not used"
@@ -49,7 +50,7 @@ Set-PSFConfig -Module dbachecks -Name policy.diskspace.percentfree -Value 20 -In
 Set-PSFConfig -Module dbachecks -Name policy.dbcc.maxdays -Value 7 -Initialize -Description "Maximum number of days before DBCC CHECKDB is considered outdated"
 
 #Encryption
-Set-PSFConfig -Module dbachecks -Name policy.certificateexpiration.excludedb -Value '{master, msdb, model, tempdb}'  -Initialize -Description "Databases to exclude from expired certificate checks"
+Set-PSFConfig -Module dbachecks -Name policy.certificateexpiration.excludedb -Value @('master', 'msdb', 'model', 'tempdb')  -Initialize -Description "Databases to exclude from expired certificate checks"
 Set-PSFConfig -Module dbachecks -Name policy.certificateexpiration.warningwindow -Value 1  -Initialize -Description "The number of months prior to a certificate being expired that you want warning about"
 
 #Identity
@@ -80,6 +81,9 @@ Set-PSFConfig -Module dbachecks -Name policy.dacallowed -Validation bool -Value 
 
 #OLE Automation
 Set-PSFConfig -Module dbachecks -Name policy.oleautomation -Validation bool -Value $false -Initialize -Description "OLE Automation should be enabled `$true or disabled `$false"
+
+#Two Digit Year Cutoff
+Set-PSFConfig -Module dbachecks -Name policy.twodigityearcutoff -Value 2049 -Initialize -Description "The value for 'Two Digit Year Cutoff' configuration. Default is 2049. "
 
 #Connectivity
 Set-PSFConfig -Module dbachecks -Name policy.connection.authscheme  -Value "Kerberos" -Initialize -Description "Auth requirement (Kerberos, NTLM, etc)"
@@ -117,6 +121,7 @@ Set-PSFConfig -Module dbachecks -Name policy.database.filebalancetolerance -Valu
 Set-PSFConfig -Module dbachecks -Name policy.database.filegrowthfreespacethreshold -Value 20 -Initialize -Description "Integer representing percentage of free space within a database file before warning"
 Set-PSFConfig -Module dbachecks -Name policy.database.wrongcollation -Value @() -Initialize -Description "Databases that doesnt match server collation check"
 Set-PSFConfig -Module dbachecks -Name policy.database.maxdopexcludedb -Value @() -Initialize -Description "Database Names that we don't want to check for maxdop"
+Set-PSFConfig -Module dbachecks -Name policy.database.maxdop -Value 0 -Initialize -Description "The value for the database maxdop that we expect"
 Set-PSFConfig -Module dbachecks -Name policy.database.status.excludereadonly -Value @() -Initialize -Description "Database names that we expect to be readonly"
 Set-PSFConfig -Module dbachecks -Name policy.database.status.excludeoffline -Value @() -Initialize -Description "Database names that we expect to be offline"
 Set-PSFConfig -Module dbachecks -Name policy.database.status.excluderestoring -Value @() -Initialize -Description "Database names that we expect to be restoring"
@@ -153,7 +158,7 @@ Set-PSFConfig -Module dbachecks -name policy.ola.DeleteBackupHistoryscheduled -V
 Set-PSFConfig -Module dbachecks -name policy.ola.DeleteBackupHistoryCleanUp -Value 30 -Initialize -Description "Ola's Delete Backup History Cleanup setting should be this many days"
 Set-PSFConfig -Module dbachecks -name policy.ola.PurgeJobHistoryenabled -Validation bool -Value $true -Initialize -Description "Ola's Purge Job History should be enabled `$true or disabled `$false"
 Set-PSFConfig -Module dbachecks -name policy.ola.PurgeJobHistoryscheduled -Validation bool -Value $true -Initialize -Description "Ola's Purge Job History should be scheduled `$true or disabled `$false"
-Set-PSFConfig -Module dbachecks -name policy.ola.PurgeconfigCleanUp -Value 30 -Initialize -Description "Ola's Purge Backup History Cleanup setting should be this many days"
+Set-PSFConfig -Module dbachecks -name policy.ola.PurgeJobHistoryCleanUp -Value 30 -Initialize -Description "Ola's Purge Backup History Cleanup setting should be this many days"
 Set-PSFConfig -Module dbachecks -name ola.JobName.SystemFull -Value 'DatabaseBackup - SYSTEM_DATABASES - FULL' -Initialize -Description "The name for the Ola System Full Job"
 Set-PSFConfig -Module dbachecks -name ola.JobName.UserFull -Value 'DatabaseBackup - USER_DATABASES - FULL' -Initialize -Description "The name for the Ola User Full Job"
 Set-PSFConfig -Module dbachecks -name ola.JobName.UserDiff -Value 'DatabaseBackup - USER_DATABASES - DIFF' -Initialize -Description "The name for the Ola User Diff Job"
@@ -176,6 +181,7 @@ Set-PSFConfig -Module dbachecks -Name policy.whoisactive.database -Value "master
 
 #Build
 Set-PSFConfig -Module dbachecks -Name policy.build.warningwindow -Value 6 -Initialize -Description "The number of months prior to a build being unsupported that you want warning about"
+Set-PSFConfig -Module dbachecks -Name policy.build.behind -Value $null -Initialize -Description "The max number of service packs or cumulative updates a build can be behind by (ex. 1SP or 3CU). Null by default."
 
 # The frequency of the Ola Hallengrens User Full backups
 # See https://msdn.microsoft.com/en-us/library/microsoft.sqlserver.management.smo.agent.jobschedule.frequencyinterval.aspx
@@ -230,5 +236,16 @@ Set-PSFConfig -Module dbachecks -Name mail.subject  -Value 'dbachecks results' -
 Set-PSFConfig -Module dbachecks -Name command.invokedbccheck.excludecheck -Value @() -Initialize -Description "Invoke-DbcCheck: The checks that should be skipped by default."
 Set-PSFConfig -Module dbachecks -Name command.invokedbccheck.excludedatabases -Value @() -Initialize -Description "Invoke-DbcCheck: The databases that should be skipped by default."
 
-# config for integration testing 
+# config for integration testing
 Set-PSFConfig -Module dbachecks -Name testing.integration.instance -Value @("localhost") -Initialize -Description "Default SQL Server instances to be used by integration tests"
+
+# Server
+Set-PSFConfig -Module dbachecks -Name policy.server.cpuprioritisation -Value $true -Initialize -Description "Shall we skip the CPU Prioritisation check"
+
+# Devops
+Set-PSFConfig -Module dbachecks -Name database.exists -Value @("master","msdb","tempdb","model") -Initialize -Description "The databases we expect to be on the instances"
+
+# Not Contactable
+Set-PSFConfig -Module dbachecks -Name global.notcontactable -Value @() -Initialize -Description "This is used within the checks to avoid trying to contact none-responsive instances many times - do not set manually"
+Set-PSFConfig -Module dbachecks -Name policy.traceflags.expected -Value @() -Initialize -Description "The trace flags we expect to be running"
+Set-PSFConfig -Module dbachecks -Name policy.traceflags.notexpected -Value @() -Initialize -Description "The trace flags we expect not to be running"
