@@ -153,7 +153,7 @@ Describe "Checking Instance.Tests.ps1 checks" -Tag UnitTest {
     Context "Checking Supported Build" {
         [DateTime]$Date = Get-Date -Format O
 
-        $TestCases = @{"Date" = $Date; "BuildBehind" = "1SP"; }, 
+        $TestCases = @{"Date" = $Date; "BuildBehind" = "1SP"; },
         @{"Date" = $Date; "BuildBehind" = "1CU"; }
         #if BuildBehind it should pass if build is >= SP/CU specified & Support Dates are valid
         It "Passed check correctly when the current build is not behind the BuildBehind value of <BuildBehind>" -TestCases $TestCases {
@@ -212,7 +212,7 @@ Describe "Checking Instance.Tests.ps1 checks" -Tag UnitTest {
     Context "Checking Trace Flags" {
         ## Mock for one trace flag
         Mock Get-DbaTraceFlag {
-			
+
             [PSObject]@{
                 'ComputerName' = 'ComputerName'
                 'Global'       = 1
@@ -231,7 +231,7 @@ Describe "Checking Instance.Tests.ps1 checks" -Tag UnitTest {
         }
         It "Should fail correctly when the trace flag does not exist and there is no trace flag" {
             Mock Get-DbaTraceFlag {
-			
+
                 [PSObject]@{
                     'ComputerName' = 'ComputerName'
                     'Global'       = 1
@@ -282,8 +282,8 @@ Describe "Checking Instance.Tests.ps1 checks" -Tag UnitTest {
                     'Status'       = 1
                     'TraceFlag'    = 3605
                 }
-			}
-			Assert-TraceFlag -SQLInstance Dummy -ExpectedTraceFlag 118, 117, 3604, 3605
+            }
+            Assert-TraceFlag -SQLInstance Dummy -ExpectedTraceFlag 118, 117, 3604, 3605
         }
         It "Should Pass Correctly for more than one trace flag when they exist but there are extra trace flags" {
             Mock Get-DbaTraceFlag {
@@ -323,8 +323,8 @@ Describe "Checking Instance.Tests.ps1 checks" -Tag UnitTest {
                     'Status'       = 1
                     'TraceFlag'    = 3605
                 }
-			}
-			Assert-TraceFlag -SQLInstance Dummy -ExpectedTraceFlag 118, 117, 3604
+            }
+            Assert-TraceFlag -SQLInstance Dummy -ExpectedTraceFlag 118, 117, 3604
         }
         It "Should Fail Correctly when checking more than one trace flag when 1 is missing" {
             Mock Get-DbaTraceFlag {
@@ -355,8 +355,8 @@ Describe "Checking Instance.Tests.ps1 checks" -Tag UnitTest {
                     'Status'       = 1
                     'TraceFlag'    = 3604
                 }
-			}
-			{Assert-TraceFlag -SQLInstance Dummy -ExpectedTraceFlag 118, 117, 3604, 3605} | Should -Throw -ExpectedMessage "Expected 3605 to be found in collection @(117, 118, 3604), because We expect that Trace Flag 3605 will be set on Dummy, but it was not found."
+            }
+            {Assert-TraceFlag -SQLInstance Dummy -ExpectedTraceFlag 118, 117, 3604, 3605} | Should -Throw -ExpectedMessage "Expected 3605 to be found in collection @(117, 118, 3604), because We expect that Trace Flag 3605 will be set on Dummy, but it was not found."
         }
         It "Should Fail Correctly when checking more than one trace flag when 2 are missing" {
             Mock Get-DbaTraceFlag {
@@ -378,16 +378,16 @@ Describe "Checking Instance.Tests.ps1 checks" -Tag UnitTest {
                     'Status'       = 1
                     'TraceFlag'    = 118
                 }
-			}
-			{Assert-TraceFlag -SQLInstance Dummy -ExpectedTraceFlag 118, 117, 3604, 3605} | Should -Throw -ExpectedMessage "Expected 3604 to be found in collection @(117, 118), because We expect that Trace Flag 3604 will be set on Dummy, but it was not found"
-		}
-		It "Should pass correctly when no trace flag exists and none expected" {
-			Mock Get-DbaTraceFlag {
-			}
+            }
+            {Assert-TraceFlag -SQLInstance Dummy -ExpectedTraceFlag 118, 117, 3604, 3605} | Should -Throw -ExpectedMessage "Expected 3604 to be found in collection @(117, 118), because We expect that Trace Flag 3604 will be set on Dummy, but it was not found"
+        }
+        It "Should pass correctly when no trace flag exists and none expected" {
+            Mock Get-DbaTraceFlag {
+            }
             Assert-TraceFlag -SQLInstance Dummy -ExpectedTraceFlag $null
         }
-		It "Should fail correctly when a trace flag exists and none expected" {
-			Mock Get-DbaTraceFlag {
+        It "Should fail correctly when a trace flag exists and none expected" {
+            Mock Get-DbaTraceFlag {
                 [PSObject]@{
                     'ComputerName' = 'ComputerName'
                     'Global'       = 1
@@ -397,13 +397,13 @@ Describe "Checking Instance.Tests.ps1 checks" -Tag UnitTest {
                     'Status'       = 1
                     'TraceFlag'    = 117
                 }
-			}
+            }
             {Assert-TraceFlag -SQLInstance Dummy -ExpectedTraceFlag $null} | Should -Throw -ExpectedMessage "Expected `$null or empty, because We expect that there will be no Trace Flags set on Dummy, but got 117"
         }
     }
     Context "Checking Trace Flags Not Expected" {
         ## Mock for one trace flag
-        Mock Get-DbaTraceFlag {			
+        Mock Get-DbaTraceFlag {
             [PSObject]@{
                 'ComputerName' = 'ComputerName'
                 'Global'       = 1
@@ -417,26 +417,26 @@ Describe "Checking Instance.Tests.ps1 checks" -Tag UnitTest {
         It "Should pass correctly when the trace flag exists and it is not the one expected to be running" {
             Assert-NotTraceFlag -SQLInstance Dummy -NotExpectedTraceFlag 117
         }
-        It "Should pass correctly when no trace flag is runnign" {
-			Mock Get-DbaTraceFlag {}
+        It "Should pass correctly when no trace flag is running" {
+            Mock Get-DbaTraceFlag {}
             Assert-NotTraceFlag -SQLInstance Dummy -NotExpectedTraceFlag 117
         }
         It "Should fail correctly when the trace flag is running and is the only one" {
-			Mock Get-DbaTraceFlag {			
-				[PSObject]@{
-					'ComputerName' = 'ComputerName'
-					'Global'       = 1
-					'InstanceName' = 'MSSQLSERVER'
-					'Session'      = 0
-					'SqlInstance'  = 'SQLInstance'
-					'Status'       = 1
-					'TraceFlag'    = 118
-				}
-			}
+            Mock Get-DbaTraceFlag {
+                [PSObject]@{
+                    'ComputerName' = 'ComputerName'
+                    'Global'       = 1
+                    'InstanceName' = 'MSSQLSERVER'
+                    'Session'      = 0
+                    'SqlInstance'  = 'SQLInstance'
+                    'Status'       = 1
+                    'TraceFlag'    = 118
+                }
+            }
             {Assert-NotTraceFlag -SQLInstance Dummy -NotExpectedTraceFlag 118} | Should -Throw -ExpectedMessage "Expected 118 to not be found in collection 118, because We expect that Trace Flag 118 will not be set on Dummy, but it was found."
         }
         It "Should fail correctly for one trace flag when the trace flag is running but there is another one running as well" {
-            Mock Get-DbaTraceFlag {	
+            Mock Get-DbaTraceFlag {
                 [PSObject]@{
                     'ComputerName' = 'ComputerName'
                     'Global'       = 1
@@ -460,53 +460,313 @@ Describe "Checking Instance.Tests.ps1 checks" -Tag UnitTest {
         }
         It "Should Pass Correctly for more than one trace flag when no trace flag is set" {
             Mock Get-DbaTraceFlag {}
-			Assert-NotTraceFlag -SQLInstance Dummy -NotExpectedTraceFlag 118, 117, 3604, 3605
+            Assert-NotTraceFlag -SQLInstance Dummy -NotExpectedTraceFlag 118, 117, 3604, 3605
         }
         It "Should Pass Correctly for more than one trace flag when a different one is running" {
             Mock Get-DbaTraceFlag {
-				[PSObject]@{
-					'ComputerName' = 'ComputerName'
-					'Global'       = 1
-					'InstanceName' = 'MSSQLSERVER'
-					'Session'      = 0
-					'SqlInstance'  = 'SQLInstance'
-					'Status'       = 1
-					'TraceFlag'    = 117
-				},
-				[PSObject]@{
-					'ComputerName' = 'ComputerName'
-					'Global'       = 1
-					'InstanceName' = 'MSSQLSERVER'
-					'Session'      = 0
-					'SqlInstance'  = 'SQLInstance'
-					'Status'       = 1
-					'TraceFlag'    = 118
-				}
-			}
-			Assert-NotTraceFlag -SQLInstance Dummy -NotExpectedTraceFlag  3604, 3605
+                [PSObject]@{
+                    'ComputerName' = 'ComputerName'
+                    'Global'       = 1
+                    'InstanceName' = 'MSSQLSERVER'
+                    'Session'      = 0
+                    'SqlInstance'  = 'SQLInstance'
+                    'Status'       = 1
+                    'TraceFlag'    = 117
+                },
+                [PSObject]@{
+                    'ComputerName' = 'ComputerName'
+                    'Global'       = 1
+                    'InstanceName' = 'MSSQLSERVER'
+                    'Session'      = 0
+                    'SqlInstance'  = 'SQLInstance'
+                    'Status'       = 1
+                    'TraceFlag'    = 118
+                }
+            }
+            Assert-NotTraceFlag -SQLInstance Dummy -NotExpectedTraceFlag  3604, 3605
         }
         It "Should Fail Correctly for more than one trace flag when one is running" {
             Mock Get-DbaTraceFlag {
-				[PSObject]@{
-					'ComputerName' = 'ComputerName'
-					'Global'       = 1
-					'InstanceName' = 'MSSQLSERVER'
-					'Session'      = 0
-					'SqlInstance'  = 'SQLInstance'
-					'Status'       = 1
-					'TraceFlag'    = 117
-				},
-				[PSObject]@{
-					'ComputerName' = 'ComputerName'
-					'Global'       = 1
-					'InstanceName' = 'MSSQLSERVER'
-					'Session'      = 0
-					'SqlInstance'  = 'SQLInstance'
-					'Status'       = 1
-					'TraceFlag'    = 118
-				}
-			}
-			{Assert-NotTraceFlag -SQLInstance Dummy -NotExpectedTraceFlag  117,3604, 3605} | Should -Throw -ExpectedMessage  "Expected 117 to not be found in collection @(117, 118), because We expect that Trace Flag 117 will not be set on Dummy, but it was found."
+                [PSObject]@{
+                    'ComputerName' = 'ComputerName'
+                    'Global'       = 1
+                    'InstanceName' = 'MSSQLSERVER'
+                    'Session'      = 0
+                    'SqlInstance'  = 'SQLInstance'
+                    'Status'       = 1
+                    'TraceFlag'    = 117
+                },
+                [PSObject]@{
+                    'ComputerName' = 'ComputerName'
+                    'Global'       = 1
+                    'InstanceName' = 'MSSQLSERVER'
+                    'Session'      = 0
+                    'SqlInstance'  = 'SQLInstance'
+                    'Status'       = 1
+                    'TraceFlag'    = 118
+                }
+            }
+            {Assert-NotTraceFlag -SQLInstance Dummy -NotExpectedTraceFlag  117, 3604, 3605} | Should -Throw -ExpectedMessage  "Expected 117 to not be found in collection @(117, 118), because We expect that Trace Flag 117 will not be set on Dummy, but it was found."
         }
-	}
+    }
+    Context "Checking CLR Enabled" {
+        # Mock the version check for running tests
+        Mock Connect-DbaInstance {}
+        # Define test cases for the results to fail test and fill expected message
+        # So the results of SPConfigure is 1, we expect $false but the result is true and the results of SPConfigure is 0, we expect $true but the result is false
+        $TestCases = @{spconfig = 1; expected = $false; actual = $true}, @{spconfig = 0; expected = $true; actual = $false}
+        It "Fails Check Correctly for Config <spconfig> and expected value <expected>" -TestCases $TestCases {
+            Param($spconfig, $actual, $expected)
+            Mock Get-DbaSpConfigure {@{"ConfiguredValue" = $spconfig}}
+            {Assert-CLREnabled -SQLInstance 'Dummy' -CLREnabled $expected} | Should -Throw -ExpectedMessage "Expected `$$expected, because The CLR Enabled should be set correctly, but got `$$actual"
+        }
+        $TestCases = @{spconfig = 0; expected = $false}, @{spconfig = 1; expected = $true; }
+        It "Passes Check Correctly for Config <spconfig> and expected value <expected>" -TestCases $TestCases {
+            Param($spconfig, $expected)
+            Mock Get-DbaSpConfigure {@{"ConfiguredValue" = $spconfig}}
+            Assert-CLREnabled -SQLInstance 'Dummy' -CLREnabled $expected
+        }
+        # Validate we have called the mock the correct number of times
+        It "Should call the mocks" {
+            $assertMockParams = @{
+                'CommandName' = 'Get-DbaSpConfigure'
+                'Times'       = 4
+                'Exactly'     = $true
+            }
+            Assert-MockCalled @assertMockParams
+        }
+    }
+    Context "Checking Cross DB Ownership Chaining" {
+        # Mock the version check for running tests
+        Mock Connect-DbaInstance {}
+        # Define test cases for the results to fail test and fill expected message
+        # So the results of SPConfigure is 1, we expect $false but the result is true and the results of SPConfigure is 0, we expect $true but the result is false
+        $TestCases = @{spconfig = 1; expected = $false; actual = $true}, @{spconfig = 0; expected = $true; actual = $false}
+        It "Fails Check Correctly for Config <spconfig> and expected value <expected>" -TestCases $TestCases {
+            Param($spconfig, $actual, $expected)
+            Mock Get-DbaSpConfigure {@{"ConfiguredValue" = $spconfig}}
+            {Assert-CrossDBOwnershipChaining -SQLInstance 'Dummy' -CrossDBOwnershipChaining $expected} | Should -Throw -ExpectedMessage "Expected `$$expected, because The Cross Database Ownership Chaining setting should be set correctly, but got `$$actual"
+        }
+        $TestCases = @{spconfig = 0; expected = $false}, @{spconfig = 1; expected = $true; }
+        It "Passes Check Correctly for Config <spconfig> and expected value <expected>" -TestCases $TestCases {
+            Param($spconfig, $expected)
+            Mock Get-DbaSpConfigure {@{"ConfiguredValue" = $spconfig}}
+            Assert-CrossDBOwnershipChaining -SQLInstance 'Dummy' -CrossDBOwnershipChaining $expected
+        }
+        # Validate we have called the mock the correct number of times
+        It "Should call the mocks" {
+            $assertMockParams = @{
+                'CommandName' = 'Get-DbaSpConfigure'
+                'Times'       = 4
+                'Exactly'     = $true
+            }
+            Assert-MockCalled @assertMockParams
+        }
+    }
+    Context "Checking AdHoc Distributed Queries Enabled" {
+        # Mock the version check for running tests
+        Mock Connect-DbaInstance {}
+        # Define test cases for the results to fail test and fill expected message
+        # So the results of SPConfigure is 1, we expect $false but the result is true and the results of SPConfigure is 0, we expect $true but the result is false
+        $TestCases = @{spconfig = 1; expected = $false; actual = $true}, @{spconfig = 0; expected = $true; actual = $false}
+        It "Fails Check Correctly for Config <spconfig> and expected value <expected>" -TestCases $TestCases {
+            Param($spconfig, $actual, $expected)
+            Mock Get-DbaSpConfigure {@{"ConfiguredValue" = $spconfig}}
+            {Assert-AdHocDistributedQueriesEnabled -SQLInstance 'Dummy' -AdHocDistributedQueriesEnabled $expected} | Should -Throw -ExpectedMessage "Expected `$$expected, because The AdHoc Distributed Queries Enabled setting should be set correctly, but got `$$actual"
+        }
+        $TestCases = @{spconfig = 0; expected = $false}, @{spconfig = 1; expected = $true; }
+        It "Passes Check Correctly for Config <spconfig> and expected value <expected>" -TestCases $TestCases {
+            Param($spconfig, $expected)
+            Mock Get-DbaSpConfigure {@{"ConfiguredValue" = $spconfig}}
+            Assert-AdHocDistributedQueriesEnabled -SQLInstance 'Dummy' -AdHocDistributedQueriesEnabled $expected
+        }
+        # Validate we have called the mock the correct number of times
+        It "Should call the mocks" {
+            $assertMockParams = @{
+                'CommandName' = 'Get-DbaSpConfigure'
+                'Times'       = 4
+                'Exactly'     = $true
+            }
+            Assert-MockCalled @assertMockParams
+        }
+    }
+    Context "Checking XPCmdShell is disabled" {
+        # Mock the version check for running tests
+        Mock Connect-DbaInstance {}
+        # Define test cases for the results to fail test and fill expected message
+        # This one is different from the others as we are checking for disabled !!
+        # So the results of SPConfigure is 1, we expect $true but the result is false and the results of SPConfigure is 0, we expect $false but the result is true
+        $TestCases = @{spconfig = 1; expected = $true; actual = $false}, @{spconfig = 0; expected = $false; actual = $true}
+        It "Fails Check Correctly for Config <spconfig> and expected value <expected>" -TestCases $TestCases {
+            Param($spconfig, $actual, $expected)
+            Mock Get-DbaSpConfigure {@{"ConfiguredValue" = $spconfig}}
+            {Assert-XpCmdShellDisabled -SQLInstance 'Dummy' -XpCmdShellDisabled $expected} | Should -Throw -ExpectedMessage "Expected `$$expected, because The XP CmdShell setting should be set correctly, but got `$$actual"
+        }
+        # again this one is different from the others as we are checking for disabled
+        $TestCases = @{spconfig = 1; expected = $false}, @{spconfig = 0; expected = $true; }
+        It "Passes Check Correctly for Config <spconfig> and expected value <expected>" -TestCases $TestCases {
+            Param($spconfig, $expected)
+            Mock Get-DbaSpConfigure {@{"ConfiguredValue" = $spconfig}}
+            Assert-XpCmdShellDisabled -SQLInstance 'Dummy' -XpCmdShellDisabled $expected
+        }
+        # Validate we have called the mock the correct number of times
+        It "Should call the mocks" {
+            $assertMockParams = @{
+                'CommandName' = 'Get-DbaSpConfigure'
+                'Times'       = 4
+                'Exactly'     = $true
+            }
+            Assert-MockCalled @assertMockParams
+        }
+    }
+    Context "Checking ErrorLog Count" {
+        # if configured value is 30 and test value 30 it will pass
+        It "Passes Check Correctly with the number of error log files set to 30" {
+            # Mock to pass
+            Mock Get-DbaErrorLogConfig {@{"LogCount" = 30}}
+            Assert-ErrorLogCount -SQLInstance 'Dummy' -errorLogCount 30
+        }
+
+        # if configured value is less than the current value it fails
+        It "Fails Check Correctly with the number of error log files being 10 instead of 30 or higher" {
+            # Mock to fail
+            Mock Get-DbaErrorLogConfig {@{"LogCount" = 10}}
+            {Assert-ErrorLogCount -SQLInstance 'Dummy' -errorLogCount 30}  | Should -Throw -ExpectedMessage "Expected the actual value to be greater than or equal to 30, because We expect to have at least 30 number of error log files, but got 10."
+        }
+
+        # if configured value is higher than the current value it fails
+        It "Passes Check Correctly with the number of error log files being 40 and test of 30 or higher" {
+            # Mock to Pass
+            Mock Get-DbaErrorLogConfig {@{"LogCount" = 40}}
+            Assert-ErrorLogCount -SQLInstance 'Dummy' -errorLogCount 30
+        }
+
+        # Validate we have called the mock the correct number of times
+        It "Should call the mocks" {
+            $assertMockParams = @{
+                'CommandName' = 'Get-DbaErrorLogConfig'
+                'Times'       = 3
+                'Exactly'     = $true
+            }
+            Assert-MockCalled @assertMockParams
+        }
+    }
 }
+
+InModuleScope dbachecks {
+    (Get-ChildItem $PSScriptRoot/../../internal/assertions/).ForEach{. $Psitem.FullName}
+    Describe "Testing AllInstanceInfo and Relevant Assertions" -Tag AllInstanceInfo {
+        function Get-ErrorLogEntry {}
+        Mock Get-DbcConfigValue {} -ParameterFilter {$Name -and $Name -eq 'policy.errorlog.warningwindow'}
+        Context "Checking Get-AllInstanceInfo" {
+            Mock Get-ErrorLogEntry {}
+    
+            It "Should return the correct results for ErrorLog Entries when there are no severities" {
+           
+                (Get-AllInstanceInfo -Instance Dummy -Tags ErrorLog -There $true).ErrorLog | Should -BeNullOrEmpty -Because "We need no entries when we have no sev 17 to 24 errors"
+            }
+
+            It "Should return the correct results for ErrorLog Entries when there are severities" {
+                Mock Get-ErrorLogEntry {[PSCustomObject]@{
+                    LogDate     = '2019-02-14 23:00'
+                    ProcessInfo = 'spid55'
+                    Text        = 'Error: 50000, Severity: 18, State: 1.'
+                }
+            }
+                (Get-AllInstanceInfo -Instance Dummy -Tags ErrorLog -There $true).ErrorLog | Should -BeOfType PSCustomObject -Because "We need entries when we have sev 17 to 24 errors"
+            }
+        }
+        Context "Checking ErrorLog Entries" {
+           
+            It "Should pass the test successfully when there are no Severity Errors" {
+                 # Mock for success
+            Mock Get-AllInstanceInfo {}
+                Assert-ErrorLogEntry -AllInstanceInfo (Get-AllInstanceInfo)
+            }
+            
+            It "Should fail the test successfully when there are Severity Errors" {
+                # MOck for failing test
+            Mock Get-AllInstanceInfo {[PSCustomObject]@{
+                ErrorLog = [PSCustomObject]@{
+                    LogDate     = '2019-02-14 23:00'
+                    ProcessInfo = 'spid55'
+                    Text        = 'Error: 50000, Severity: 18, State: 1.'
+                }
+            }}
+                {Assert-ErrorLogEntry -AllInstanceInfo (Get-AllInstanceInfo)} | Should -Throw -ExpectedMessage "Expected `$null or empty, because these severities indicate serious problems, but got @(@{LogDate=2019-02-14 23:00; ProcessInfo=spid55; Text=Error: 50000, Severity: 18, State: 1.})."
+            }
+        }
+    }
+}
+# SIG # Begin signature block
+# MIINEAYJKoZIhvcNAQcCoIINATCCDP0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
+# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU3zT39A2lyXiuj8g4j77KCVG1
+# vq2gggpSMIIFGjCCBAKgAwIBAgIQAsF1KHTVwoQxhSrYoGRpyjANBgkqhkiG9w0B
+# AQsFADByMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYD
+# VQQLExB3d3cuZGlnaWNlcnQuY29tMTEwLwYDVQQDEyhEaWdpQ2VydCBTSEEyIEFz
+# c3VyZWQgSUQgQ29kZSBTaWduaW5nIENBMB4XDTE3MDUwOTAwMDAwMFoXDTIwMDUx
+# MzEyMDAwMFowVzELMAkGA1UEBhMCVVMxETAPBgNVBAgTCFZpcmdpbmlhMQ8wDQYD
+# VQQHEwZWaWVubmExETAPBgNVBAoTCGRiYXRvb2xzMREwDwYDVQQDEwhkYmF0b29s
+# czCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAI8ng7JxnekL0AO4qQgt
+# Kr6p3q3SNOPh+SUZH+SyY8EA2I3wR7BMoT7rnZNolTwGjUXn7bRC6vISWg16N202
+# 1RBWdTGW2rVPBVLF4HA46jle4hcpEVquXdj3yGYa99ko1w2FOWzLjKvtLqj4tzOh
+# K7wa/Gbmv0Si/FU6oOmctzYMI0QXtEG7lR1HsJT5kywwmgcjyuiN28iBIhT6man0
+# Ib6xKDv40PblKq5c9AFVldXUGVeBJbLhcEAA1nSPSLGdc7j4J2SulGISYY7ocuX3
+# tkv01te72Mv2KkqqpfkLEAQjXgtM0hlgwuc8/A4if+I0YtboCMkVQuwBpbR9/6ys
+# Z+sCAwEAAaOCAcUwggHBMB8GA1UdIwQYMBaAFFrEuXsqCqOl6nEDwGD5LfZldQ5Y
+# MB0GA1UdDgQWBBRcxSkFqeA3vvHU0aq2mVpFRSOdmjAOBgNVHQ8BAf8EBAMCB4Aw
+# EwYDVR0lBAwwCgYIKwYBBQUHAwMwdwYDVR0fBHAwbjA1oDOgMYYvaHR0cDovL2Ny
+# bDMuZGlnaWNlcnQuY29tL3NoYTItYXNzdXJlZC1jcy1nMS5jcmwwNaAzoDGGL2h0
+# dHA6Ly9jcmw0LmRpZ2ljZXJ0LmNvbS9zaGEyLWFzc3VyZWQtY3MtZzEuY3JsMEwG
+# A1UdIARFMEMwNwYJYIZIAYb9bAMBMCowKAYIKwYBBQUHAgEWHGh0dHBzOi8vd3d3
+# LmRpZ2ljZXJ0LmNvbS9DUFMwCAYGZ4EMAQQBMIGEBggrBgEFBQcBAQR4MHYwJAYI
+# KwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmRpZ2ljZXJ0LmNvbTBOBggrBgEFBQcwAoZC
+# aHR0cDovL2NhY2VydHMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0U0hBMkFzc3VyZWRJ
+# RENvZGVTaWduaW5nQ0EuY3J0MAwGA1UdEwEB/wQCMAAwDQYJKoZIhvcNAQELBQAD
+# ggEBANuBGTbzCRhgG0Th09J0m/qDqohWMx6ZOFKhMoKl8f/l6IwyDrkG48JBkWOA
+# QYXNAzvp3Ro7aGCNJKRAOcIjNKYef/PFRfFQvMe07nQIj78G8x0q44ZpOVCp9uVj
+# sLmIvsmF1dcYhOWs9BOG/Zp9augJUtlYpo4JW+iuZHCqjhKzIc74rEEiZd0hSm8M
+# asshvBUSB9e8do/7RhaKezvlciDaFBQvg5s0fICsEhULBRhoyVOiUKUcemprPiTD
+# xh3buBLuN0bBayjWmOMlkG1Z6i8DUvWlPGz9jiBT3ONBqxXfghXLL6n8PhfppBhn
+# daPQO8+SqF5rqrlyBPmRRaTz2GQwggUwMIIEGKADAgECAhAECRgbX9W7ZnVTQ7Vv
+# lVAIMA0GCSqGSIb3DQEBCwUAMGUxCzAJBgNVBAYTAlVTMRUwEwYDVQQKEwxEaWdp
+# Q2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xJDAiBgNVBAMTG0Rp
+# Z2lDZXJ0IEFzc3VyZWQgSUQgUm9vdCBDQTAeFw0xMzEwMjIxMjAwMDBaFw0yODEw
+# MjIxMjAwMDBaMHIxCzAJBgNVBAYTAlVTMRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMx
+# GTAXBgNVBAsTEHd3dy5kaWdpY2VydC5jb20xMTAvBgNVBAMTKERpZ2lDZXJ0IFNI
+# QTIgQXNzdXJlZCBJRCBDb2RlIFNpZ25pbmcgQ0EwggEiMA0GCSqGSIb3DQEBAQUA
+# A4IBDwAwggEKAoIBAQD407Mcfw4Rr2d3B9MLMUkZz9D7RZmxOttE9X/lqJ3bMtdx
+# 6nadBS63j/qSQ8Cl+YnUNxnXtqrwnIal2CWsDnkoOn7p0WfTxvspJ8fTeyOU5JEj
+# lpB3gvmhhCNmElQzUHSxKCa7JGnCwlLyFGeKiUXULaGj6YgsIJWuHEqHCN8M9eJN
+# YBi+qsSyrnAxZjNxPqxwoqvOf+l8y5Kh5TsxHM/q8grkV7tKtel05iv+bMt+dDk2
+# DZDv5LVOpKnqagqrhPOsZ061xPeM0SAlI+sIZD5SlsHyDxL0xY4PwaLoLFH3c7y9
+# hbFig3NBggfkOItqcyDQD2RzPJ6fpjOp/RnfJZPRAgMBAAGjggHNMIIByTASBgNV
+# HRMBAf8ECDAGAQH/AgEAMA4GA1UdDwEB/wQEAwIBhjATBgNVHSUEDDAKBggrBgEF
+# BQcDAzB5BggrBgEFBQcBAQRtMGswJAYIKwYBBQUHMAGGGGh0dHA6Ly9vY3NwLmRp
+# Z2ljZXJ0LmNvbTBDBggrBgEFBQcwAoY3aHR0cDovL2NhY2VydHMuZGlnaWNlcnQu
+# Y29tL0RpZ2lDZXJ0QXNzdXJlZElEUm9vdENBLmNydDCBgQYDVR0fBHoweDA6oDig
+# NoY0aHR0cDovL2NybDQuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0QXNzdXJlZElEUm9v
+# dENBLmNybDA6oDigNoY0aHR0cDovL2NybDMuZGlnaWNlcnQuY29tL0RpZ2lDZXJ0
+# QXNzdXJlZElEUm9vdENBLmNybDBPBgNVHSAESDBGMDgGCmCGSAGG/WwAAgQwKjAo
+# BggrBgEFBQcCARYcaHR0cHM6Ly93d3cuZGlnaWNlcnQuY29tL0NQUzAKBghghkgB
+# hv1sAzAdBgNVHQ4EFgQUWsS5eyoKo6XqcQPAYPkt9mV1DlgwHwYDVR0jBBgwFoAU
+# Reuir/SSy4IxLVGLp6chnfNtyA8wDQYJKoZIhvcNAQELBQADggEBAD7sDVoks/Mi
+# 0RXILHwlKXaoHV0cLToaxO8wYdd+C2D9wz0PxK+L/e8q3yBVN7Dh9tGSdQ9RtG6l
+# jlriXiSBThCk7j9xjmMOE0ut119EefM2FAaK95xGTlz/kLEbBw6RFfu6r7VRwo0k
+# riTGxycqoSkoGjpxKAI8LpGjwCUR4pwUR6F6aGivm6dcIFzZcbEMj7uo+MUSaJ/P
+# QMtARKUT8OZkDCUIQjKyNookAv4vcn4c10lFluhZHen6dGRrsutmQ9qzsIzV6Q3d
+# 9gEgzpkxYz0IGhizgZtPxpMQBvwHgfqL2vmCSfdibqFT+hKUGIUukpHqaGxEMrJm
+# oecYpJpkUe8xggIoMIICJAIBATCBhjByMQswCQYDVQQGEwJVUzEVMBMGA1UEChMM
+# RGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3d3cuZGlnaWNlcnQuY29tMTEwLwYDVQQD
+# EyhEaWdpQ2VydCBTSEEyIEFzc3VyZWQgSUQgQ29kZSBTaWduaW5nIENBAhACwXUo
+# dNXChDGFKtigZGnKMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEMMQowCKACgACh
+# AoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAM
+# BgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSGUXCG13OfAv5/0pfenyNd4nxE
+# HzANBgkqhkiG9w0BAQEFAASCAQA3Oz2mbycV6Q4ns38NGrSqedo4pV0TmWpQ7oxr
+# IpZQisFu095UwNQQ+dmWlwjT411VBlvw0ud0Njt+EFGt458CvvVU9T6nqkkmK2OG
+# JLkJOkzwDLrFG7H92LdJRq8LtREnBBz488xz/Tpb4HJs/Drgwi0muC99mug9Cv9C
+# ffTv69G9bf7C9yDuGHfftArerPIg+c3OVLOLuEYPgGQb84yb7k5UmtSQmRwI+puw
+# H88Byh7MRR5sTHhwSMlla0ESvTSnks/XJwWYXw/IyqyCyD9PwPJejccwiI+pC1Os
+# TKVpI+AhTilaojWO0qr5jYawjd1JndKREFl5MtrsIdUX5PVM
+# SIG # End signature block

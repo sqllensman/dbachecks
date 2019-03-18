@@ -1,8 +1,57 @@
-## Date 29/09/2018
-auto deploy bugs to readthedocs
-Alter Get-DbcReleaseNote to use the markdown file
+## Date 05/02/2019
+Thank you Chrissy! @cl
+added default environment #596
+altered configuration validation for mail to stop errors
+Ensured database status check doesnt fail as readonly for snapshots
 
 ##Latest
+
+## Date 31/01/2019 
+Thank you Chrissy!
+add support for inline config file, fixes #501 #594
+
+## Date 29/01/2019 
+Added skip for authentication scheme #587
+Added WhatIf to Update-DbcPowerBiDataSource Thank you @shaneis #590
+$null to the left Thank you @jwmoss #588 
+
+## Date 19/01/2019 
+Thank you Claudio
+Added extra check for Job History Settings #582
+Added extra check for Error Log Count #583
+Added integration test code and docker compose file
+
+##Latest
+
+## Date 22/11/2018
+Spelling - Thanks RonaldHensbergen 
+Fix for #576 When calling just Invoke-DbcCheck without a Check it fails to run the Server Tests correctly
+
+
+## Date 12/11/2018
+Added more information to the output - thanks @ClaudioESSilva
+Spelling - Thanks ChrisTuckerNM 
+Fix for #564 - Error Importing DbcConfig in PowerShell 4 - Thanks @niphod
+
+## Date 29/10/2018
+Fixed #435 Page verify on SQL 2000 and SQL2005
+Reduced number of calls to the instance for database checks improving performance
+
+## Date 27/10/2018
+Fixed #435 Page verify on SQL 2000 and SQL2005
+Reduced number of calls to the instance for database checks improving performance
+
+## Date 17/10/2018
+Spelling and Because added - Thank you @LowlyDBA
+New Check for XPCmdShell enabled added
+
+## Date 11/10/2018
+Added Check for CLR Enabled
+Added Check for Cross Database Ownership Chaining
+Added Check for Database Mail XPs
+Added Check for Ad Hoc Distributed Queries
+Added Tag for security
+Demo CI/CD at Polar Conf
 
 ## Date 24/09/2018
 Moved the Instance Connection Check to the Instance Tests
@@ -27,13 +76,13 @@ Improved error handling for HADR checks
 
 ## Date 28/08/2018
 Added MaxBehind to SupportedBuild Tests - Thank you @LowlyDBA
-Ensured the Database paramter checks only the specified Databases - Thank you @jpomfret
+Ensured the Database parameter checks only the specified Databases - Thank you @jpomfret
 Updated Set-DbcConifg to allow Append to append arrays to arrays closes #535
 Altered json filename creation to avoid max characters error
 Altered PowerBi to display information correctly with filename changes
 
 ## Date 24/08/2017
-Fixed Error with using Credential and stopped changing path when runnign checks from custom repos - Thank you @sammyxx
+Fixed Error with using Credential and stopped changing path when running checks from custom repos - Thank you @sammyxx
 
 ## Date 23/08/2017
 Update to the help message for clusters by @LowlyDBA
@@ -75,7 +124,7 @@ Fixed offline install bug #484
 
 Updated Required Module versions - Thank you @cl
 Updated Agent Checks to fail a test on no connection rather than throw all the PowerShell errors - Thanks @sqldbawithbeard
-Updated HADR Checks for PS4 compatability Issue #513
+Updated HADR Checks for PS4 compatibility Issue #513
 
 ## Date 28/06/2018
 

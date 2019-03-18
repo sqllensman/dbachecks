@@ -1,10 +1,40 @@
-$script:ModuleRoot = $PSScriptRoot
-$script:localapp = "$env:localappdata\dbachecks"
+function Assert-DatabaseMailEnabled {
+    param (
+        $SQLInstance,
+        $DatabaseMailEnabled
+    )
+   (Get-DbaSpConfigure -SqlInstance $SQLInstance -Name DatabaseMailEnabled).ConfiguredValue -eq 1 | Should -Be $DatabaseMailEnabled -Because 'The Database Mail XPs setting should be set correctly'
+}
+
+function Assert-JobHistoryRowsDisabled {
+    param (
+        $AgentServer,
+        $minimumJobHistoryRows
+    )
+    $AgentServer.MaximumHistoryRows | Should -Be $minimumJobHistoryRows -Because "Maximum job history configuration should be disabled"
+}
+
+function Assert-JobHistoryRows {
+    param (
+        $AgentServer,
+        $minimumJobHistoryRows
+    )
+    $AgentServer.MaximumHistoryRows | Should -BeGreaterOrEqual $minimumJobHistoryRows -Because "We expect the maximum job history row configuration to be greater than the configured setting $minimumJobHistoryRows"
+}
+
+function Assert-JobHistoryRowsPerJob {
+    param (
+        $AgentServer,
+        $minimumJobHistoryRowsPerJob
+    )
+    $AgentServer.MaximumJobHistoryRows | Should -BeGreaterOrEqual $minimumJobHistoryRowsPerJob -Because "We expect the maximum job history row configuration per agent job to be greater than the configured setting $minimumJobHistoryRowsPerJob"
+}
+
 # SIG # Begin signature block
 # MIINEAYJKoZIhvcNAQcCoIINATCCDP0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUXavwZZOsmcFz+/gLFVZI9FZc
-# xBmgggpSMIIFGjCCBAKgAwIBAgIQAsF1KHTVwoQxhSrYoGRpyjANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUVZqV3+yZ6FjNVJ1E7tFvdy58
+# lIigggpSMIIFGjCCBAKgAwIBAgIQAsF1KHTVwoQxhSrYoGRpyjANBgkqhkiG9w0B
 # AQsFADByMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYD
 # VQQLExB3d3cuZGlnaWNlcnQuY29tMTEwLwYDVQQDEyhEaWdpQ2VydCBTSEEyIEFz
 # c3VyZWQgSUQgQ29kZSBTaWduaW5nIENBMB4XDTE3MDUwOTAwMDAwMFoXDTIwMDUx
@@ -64,11 +94,11 @@ $script:localapp = "$env:localappdata\dbachecks"
 # EyhEaWdpQ2VydCBTSEEyIEFzc3VyZWQgSUQgQ29kZSBTaWduaW5nIENBAhACwXUo
 # dNXChDGFKtigZGnKMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEMMQowCKACgACh
 # AoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAM
-# BgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSPxldbr/SnIZ5PGDBnl7nu40xa
-# vTANBgkqhkiG9w0BAQEFAASCAQA4IJ9SOvbvAO7XOJEbuT8DeyvIAKUUXne8Y3AJ
-# 2IDgTSlu/aBUxgPraArQd4Y5fTuIHxEz/UxCM4nHn2/1OLLeVFHCfOirYnKrvO37
-# 0GsUIT+bvuWyYkidjXiF8H91q/rKkvaf3MbO0RMTJEsKnyURDmzyVLt3gY06C+Fg
-# u5hKlPoFHTdg31GwzLm+cqKQYWnSy+ybT/ugDMaUf+9UayW1mN8T7/TgmUA5ZNhr
-# iUiXr6MajYVyMJ01CW0yHIZYaUH8kTB5uSTNn6n0DIhQqk18aSsq/4pV3CJwdMZ4
-# /WQzYPRjMRtwfU71Jrxzmz5vQlRJYKWOLMq11kza3ia7w5c5
+# BgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRoWuosjY1u/VfrwujfwyttmErx
+# OjANBgkqhkiG9w0BAQEFAASCAQBfgfUgzByfZTVJ3/JPq9O9sH0758DCD4s3Q+Ly
+# Y0ODtMT7nXi8UiHfKerKIL8RAGtrB++u3EDU2r7bNnfB0MVE9qhTZRYs78xAMx55
+# 4v79veO1cA4FZl5ZZOMegzxly/jl5XxVpqH/aaplblszPSi6CMIj1bkuoscvDhSD
+# qnTVDNhcaJVFoDuYlNKHTXFT11zjpingAruD5Xe7I9bsIS+IyoxWi3loUGLlcxoq
+# EADepMg8uyzm7u9rebPr4GiQ0dTsrF0vWSf9/O4PsZ0lOPswflZXZ9M1DUdfth0A
+# YUrxnWePqL3uc/ICL5PXcMKpSAbRJghtQMT6AnCth6ekbyiu
 # SIG # End signature block

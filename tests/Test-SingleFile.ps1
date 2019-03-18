@@ -1,10 +1,33 @@
-$script:ModuleRoot = $PSScriptRoot
-$script:localapp = "$env:localappdata\dbachecks"
+param(
+    [Parameter(Mandatory = $true)]
+    [string]
+    $FileToTest
+)
+
+$FileToTest = Resolve-Path $FileToTest
+$fileName = Split-Path $FileToTest -leaf
+Write-Verbose "File to test = $FileToTest"
+
+if ($FileName -like "*.tests.ps1")
+{
+    $filename = $fileName -replace "tests\.ps1$", "ps1"
+    $sourceDir = Join-Path $PSScriptRoot "Source"
+    $functionFile = Get-ChildItem $sourceDir -Filter $fileName -Recurse | Select-Object -First 1 -ExpandProperty FullName
+    $testFile = $FileToTest
+}
+else
+{
+    $fileName = $fileName -replace ".ps1$", ".tests.ps1"
+    $testFile = (Join-Path $PSScriptRoot "../Tests/functions/$fileName")
+    $functionFile = $FileToTest
+}
+
+Invoke-Pester -Script $testFile -ExcludeTag Integration -CodeCoverage $functionFile -CodeCoverageOutputFile "$PSScriptRoot\cov.xml" 
 # SIG # Begin signature block
 # MIINEAYJKoZIhvcNAQcCoIINATCCDP0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUXavwZZOsmcFz+/gLFVZI9FZc
-# xBmgggpSMIIFGjCCBAKgAwIBAgIQAsF1KHTVwoQxhSrYoGRpyjANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUpB5aqYqtq9Xdt7AI7hSp9/E1
+# UFygggpSMIIFGjCCBAKgAwIBAgIQAsF1KHTVwoQxhSrYoGRpyjANBgkqhkiG9w0B
 # AQsFADByMQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYD
 # VQQLExB3d3cuZGlnaWNlcnQuY29tMTEwLwYDVQQDEyhEaWdpQ2VydCBTSEEyIEFz
 # c3VyZWQgSUQgQ29kZSBTaWduaW5nIENBMB4XDTE3MDUwOTAwMDAwMFoXDTIwMDUx
@@ -64,11 +87,11 @@ $script:localapp = "$env:localappdata\dbachecks"
 # EyhEaWdpQ2VydCBTSEEyIEFzc3VyZWQgSUQgQ29kZSBTaWduaW5nIENBAhACwXUo
 # dNXChDGFKtigZGnKMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEMMQowCKACgACh
 # AoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQBgjcCAQsxDjAM
-# BgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSPxldbr/SnIZ5PGDBnl7nu40xa
-# vTANBgkqhkiG9w0BAQEFAASCAQA4IJ9SOvbvAO7XOJEbuT8DeyvIAKUUXne8Y3AJ
-# 2IDgTSlu/aBUxgPraArQd4Y5fTuIHxEz/UxCM4nHn2/1OLLeVFHCfOirYnKrvO37
-# 0GsUIT+bvuWyYkidjXiF8H91q/rKkvaf3MbO0RMTJEsKnyURDmzyVLt3gY06C+Fg
-# u5hKlPoFHTdg31GwzLm+cqKQYWnSy+ybT/ugDMaUf+9UayW1mN8T7/TgmUA5ZNhr
-# iUiXr6MajYVyMJ01CW0yHIZYaUH8kTB5uSTNn6n0DIhQqk18aSsq/4pV3CJwdMZ4
-# /WQzYPRjMRtwfU71Jrxzmz5vQlRJYKWOLMq11kza3ia7w5c5
+# BgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQigsELcdjhHQ3tbsquYEBMa/ni
+# qjANBgkqhkiG9w0BAQEFAASCAQCIbziIa15P9j/f52eqbXeA56/aPRMgfQaPIhl0
+# pYOD22oW2MPTiTFroNc7XjBYu+T3d6FEryO6H7OBxAs2rVsYf9vKbVcPyfrE0v39
+# /3xRAvhhlEV2+4VLHbE+YCnSayJnMJgXxruqqmVIXWcJKKmKKDlAFWTDzXMeA852
+# f95wZ/r7Kd7styOrqn+JgKUTE9iqHdwDl04zJSVbau1AxD8JRw8MTcoNnDXdTuzK
+# qDj94G+fETrQQbvQ+tdMWHVqQ0IGD4sdrKFzt+BVOyBFfrsOR92MX05FEpK3UQuS
+# Tve0ZN+52pNYmlCic8zUxQbb5l3VrIa7BYHvy9+JPFOdDzOJ
 # SIG # End signature block
